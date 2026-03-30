@@ -15,6 +15,10 @@ export default function HUD({ speed, gear, rpm, lap, lapTime }: any) {
       <div>RPM: {Math.floor(rpm)}</div>
       <div>LAP: {lap}</div>
       <div>TIME: {lapTime.toFixed(1)} s</div>
+
+      {speed > 180 && (
+        <div style={{ color: "red" }}>⚠ HIGH SPEED</div>
+      )}
     </div>
   );
 }

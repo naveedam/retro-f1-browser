@@ -14,14 +14,14 @@ export class EngineSound {
     this.oscillator.connect(this.gainNode);
     this.gainNode.connect(this.audioCtx.destination);
 
-    this.gainNode.gain.value = 0.05;
+    this.gainNode.gain.value = 0.15;
 
     this.oscillator.start();
   }
 
   update(rpm: number) {
-    // map RPM to sound frequency
-    const frequency = 50 + (rpm / 8000) * 1000;
+    const frequency =
+      80 + Math.pow(rpm / 8000, 1.5) * 1200;
 
     this.oscillator.frequency.setValueAtTime(
       frequency,

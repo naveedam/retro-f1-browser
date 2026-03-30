@@ -10,15 +10,12 @@ export class GameEngine {
   z = 0;
 
   sound = new EngineSound();
-
   lapTimer = new LapTimer();
+
   trackLength = 5000;
 
   constructor(trackId: string = "monza") {
-    // 🗺️ set selected track
     setTrack(trackId);
-
-    // update track length based on track
     this.trackLength = getTrackLength();
   }
 
@@ -26,17 +23,14 @@ export class GameEngine {
     this.car.update(input);
 
     const prevZ = this.z;
-
-    // move forward
     this.z += this.car.speed * 0.5;
 
-    // 🔊 engine sound
+    // 🔊 sound
     this.sound.update(this.car.rpm);
 
     // ⏱️ lap timer
     this.lapTimer.update(1 / 60);
 
-    // 🏁 lap detection
     const currentPos = this.z % this.trackLength;
     const prevPos = prevZ % this.trackLength;
 
@@ -44,11 +38,15 @@ export class GameEngine {
       this.lapTimer.completeLap();
     }
 
-    // 🛑 pit lane (last 10%)
+    // 🛑 pit lane
     const inPitLane = currentPos > this.trackLength * 0.9;
-
     if (inPitLane) {
       this.car.speed = Math.min(this.car.speed, 60);
+    }
+
+    // 🚧 off-track penalty
+    if (Math.abs(this.car.x) > 1.2) {
+      this.car.speed *= 0.92;
     }
   }
 
