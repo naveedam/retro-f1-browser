@@ -3,7 +3,7 @@ import { input } from "./controls";
 import { render } from "./renderer";
 import { EngineSound } from "./sound";
 import { LapTimer } from "./lap";
-import { setTrack, getTrackLength } from "./track";
+import { setTrack, getTrackLength, getTrackInfo } from "./track";
 
 export class GameEngine {
   car = new Car();
@@ -47,6 +47,13 @@ export class GameEngine {
     // 🚧 off-track penalty
     if (Math.abs(this.car.x) > 1.2) {
       this.car.speed *= 0.92;
+    }
+
+    // 🧠 track-based difficulty
+    const segment = getTrackInfo(this.z);
+
+    if (Math.abs(segment.curve) > 1.2 && this.car.speed > 140) {
+      this.car.speed *= 0.96;
     }
   }
 

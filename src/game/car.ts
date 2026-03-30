@@ -20,6 +20,7 @@ export class Car {
   }
 
   update(input: any) {
+    // RPM behavior
     if (input.accelerate) {
       this.rpm += 120 * this.tyre.accel;
     } else {
@@ -28,6 +29,7 @@ export class Car {
 
     this.rpm = Math.max(this.idleRPM, Math.min(this.maxRPM, this.rpm));
 
+    // gear shifts
     if (this.rpm > 7000 && this.gear < this.maxGear) {
       this.gear++;
       this.rpm = 4000;
@@ -38,6 +40,7 @@ export class Car {
       this.rpm = 3000;
     }
 
+    // speed calculation
     if (input.accelerate) {
       const gearFactor = this.gear * 0.5;
       this.speed =
@@ -46,6 +49,7 @@ export class Car {
       this.speed *= 0.97;
     }
 
+    // braking
     if (input.brake) {
       this.speed *= 0.9;
       this.rpm -= 200;
@@ -53,12 +57,14 @@ export class Car {
 
     this.speed = Math.max(0, this.speed);
 
+    // 🎮 improved steering (more realistic)
     const steerStrength =
-      (this.speed / 120) * this.tyre.grip;
+      (this.speed / 120) * this.tyre.grip * 0.8;
 
     if (input.left) this.x -= 0.04 * steerStrength;
     if (input.right) this.x += 0.04 * steerStrength;
 
+    // road bounds
     this.x = Math.max(-1.5, Math.min(1.5, this.x));
   }
 }

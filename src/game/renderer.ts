@@ -1,6 +1,10 @@
 import { getTrackInfo } from "./track";
 
-export function render(ctx: CanvasRenderingContext2D, car: any, z: number) {
+export function render(
+  ctx: CanvasRenderingContext2D,
+  car: any,
+  z: number
+) {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
 
@@ -26,7 +30,9 @@ export function render(ctx: CanvasRenderingContext2D, car: any, z: number) {
     const y = horizon + perspective * (height / 2);
 
     const segment = getTrackInfo(z + i * 20);
-    accumulatedCurve += segment.curve * 0.002;
+
+    // 🔥 stronger curve = more realistic track
+    accumulatedCurve += segment.curve * 0.004;
 
     const roadWidth = perspective * width * 0.8;
 
