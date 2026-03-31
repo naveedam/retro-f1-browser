@@ -1,22 +1,4 @@
-type Props = {
-  speed: number;
-  gear: number;
-  rpm: number;
-  lap: number;
-  lapTime: number;
-  position: number;
-  totalCars: number;
-};
-
-export default function HUD({
-  speed,
-  gear,
-  rpm,
-  lap,
-  lapTime,
-  position,
-  totalCars,
-}: Props) {
+export default function HUD(props: any) {
   return (
     <div
       style={{
@@ -24,28 +6,27 @@ export default function HUD({
         top: 20,
         left: 20,
         color: "white",
-        fontFamily: "monospace",
-        fontSize: "18px",
-        background: "rgba(0,0,0,0.4)",
+        fontFamily: "system-ui",
+        background: "rgba(0,0,0,0.6)",
         padding: "12px 16px",
-        borderRadius: 10,
+        borderRadius: 12,
+        width: 180,
       }}
     >
-      <div style={{ fontWeight: 700 }}>
-        POS: {position}/{totalCars}
+      <div style={{ fontSize: 20, fontWeight: 700 }}>
+        P{props.position}
       </div>
 
-      <div>SPEED: {Math.floor(speed)} km/h</div>
-      <div>GEAR: {gear}</div>
-      <div>RPM: {Math.floor(rpm)}</div>
-      <div>LAP: {lap}</div>
-      <div>TIME: {lapTime.toFixed(1)} s</div>
+      <div style={{ marginTop: 8 }}>
+        {Math.floor(props.speed)} km/h
+      </div>
 
-      {speed > 180 && (
-        <div style={{ color: "#ff4d4d", marginTop: 6 }}>
-          ⚠ HIGH SPEED
-        </div>
-      )}
+      <div>Gear {props.gear}</div>
+      <div>Lap {props.lap}</div>
+
+      <div style={{ marginTop: 6, fontSize: 12 }}>
+        {props.lapTime.toFixed(1)} s
+      </div>
     </div>
   );
 }
