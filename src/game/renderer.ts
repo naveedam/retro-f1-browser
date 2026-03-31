@@ -1,17 +1,17 @@
-import { getTrackInfo } from "./track";
+import { AICar } from "./ai";
+import { RaceManager } from "./race";
 
 export function render(
   ctx: CanvasRenderingContext2D,
   car: any,
-  z: number
+  z: number,
+  aiCars: AICar[],
+  race: RaceManager
 ) {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
 
-  // 🎥 camera shake
-  const shake = car.speed > 150 ? Math.random() * 2 : 0;
-  ctx.save();
-  ctx.translate(shake, 0);
+  ctx.clearRect(0, 0, width, height);
 
   // sky
   ctx.fillStyle = "#87CEEB";
@@ -23,43 +23,53 @@ export function render(
 
   const horizon = height / 2;
 
-  let accumulatedCurve = 0;
+  // 🏁 GRID MESSAGE
+  if (race.state === "grid") {
+    ctx.fillStyle = "white";
+    ctx.font = "24px monospace";
+    ctx.fillText("PRESS SPACE TO START", width / 2 - 130, height / 2);
+  }
 
+  // ⏱️ COUNTDOWN
+  if (race.state === "countdown") {
+    ctx.fillStyle = "red";
+    ctx.font = "80px monospace";
+    ctx.fillText(race.countdown.toString(), width / 2 - 20, height / 2);
+  }
+
+  // ROAD
   for (let i = 0; i < 200; i++) {
-    const perspective = Math.pow(i / 200, 1.2);
+    const perspective = i / 200;
     const y = horizon + perspective * (height / 2);
 
-    const segment = getTrackInfo(z + i * 20);
-
-    // 🔥 stronger curve = more realistic track
-    accumulatedCurve += segment.curve * 0.004;
-
     const roadWidth = perspective * width * 0.8;
-
-    const x =
-      width / 2 +
-      accumulatedCurve * 300 -
-      car.x * 300;
+    const x = width / 2 - car.x * 300;
 
     ctx.fillStyle = i % 2 ? "#555" : "#666";
 
-    ctx.fillRect(
-      x - roadWidth / 2,
-      y,
-      roadWidth,
-      4
-    );
-
-    // center line
-    if (i % 6 === 0) {
-      ctx.fillStyle = "#FFF";
-      ctx.fillRect(x - 5, y, 10, 4);
-    }
+    ctx.fillRect(x - roadWidth / 2, y, roadWidth, 4);
   }
 
-  // cockpit
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, height - 120, width, 120);
+  // 🚗 AI CARS
+  aiCars.forEach((ai) => {
+    const dz = ai.z - z;
 
-  ctx.restore();
+    if (dz > 0 && dz < 2000) {
+      const scale = 1 / dz;
+
+      const x = width / 2 + ai.lane * 200;
+      const y = horizon + scale * 500;
+
+      ctx.fillStyle = "red";
+      ctx.fillRect(x, y, 10, 20);
+    }
+  });
+
+  // 🪞 REAR VIEW (basic)
+  ctx.fillStyle = "#111";
+  ctx.fillRect(width / 2 - 100, 20, 200, 50);
+
+  ctx.fillStyle = "white";
+  ctx.font = "12px monospace";
+  ctx.fillText("REAR VIEW", width / 2 - 40, 50);
 }

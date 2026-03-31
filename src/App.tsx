@@ -9,19 +9,21 @@ type Tyre = "soft" | "medium" | "hard";
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const engineRef = useRef<GameEngine | null>(null);
 
-  // 🎮 app state
   const [mode, setMode] = useState<"menu" | "race">("menu");
 
   const [selectedTrack, setSelectedTrack] = useState<string>("monza");
   const [selectedTyre, setSelectedTyre] = useState<Tyre>("medium");
 
-  // 📊 HUD state
+  // HUD state
   const [speed, setSpeed] = useState(0);
   const [gear, setGear] = useState(1);
   const [rpm, setRpm] = useState(0);
   const [lap, setLap] = useState(1);
   const [lapTime, setLapTime] = useState(0);
+  const [position, setPosition] = useState(1);
+  const [totalCars, setTotalCars] = useState(6);
 
   useEffect(() => {
     if (mode !== "race") return;
@@ -29,27 +31,34 @@ function App() {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
 
-    // 🗺️ create engine with selected track
     const engine = new GameEngine(selectedTrack);
+    engineRef.current = engine;
 
-    // 🛞 apply tyre selection
     engine.car.setTyre(tyres[selectedTyre]);
 
     initControls();
 
-    // 🔊 start engine sound
     setSoundStarter(() => engine.sound.start());
 
     function loop() {
       engine.update();
       engine.draw(ctx);
 
-      // update HUD
+      // HUD updates
       setSpeed(engine.car.speed);
       setGear(engine.car.gear);
       setRpm(engine.car.rpm);
       setLap(engine.lapTimer.lap);
       setLapTime(engine.lapTimer.lapTime);
+
+      // 🏁 POSITION SYSTEM
+      const positions = engine.getPositions();
+      const playerIndex = positions.findIndex(
+        (c) => c.id === "player"
+      );
+
+      setPosition(playerIndex + 1);
+      setTotalCars(positions.length);
 
       requestAnimationFrame(loop);
     }
@@ -57,7 +66,22 @@ function App() {
     loop();
   }, [mode, selectedTrack, selectedTyre]);
 
-  // 🟢 MENU SCREEN
+  // 🏁 SPACE → START RACE
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.code === "Space" && engineRef.current) {
+        engineRef.current.startRace();
+      }
+    }
+
+    window.addEventListener("keydown", handleKey);
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, []);
+
+  // MENU
   if (mode === "menu") {
     return (
       <Menu
@@ -70,7 +94,7 @@ function App() {
     );
   }
 
-  // 🏁 GAME SCREEN
+  // GAME
   return (
     <div
       style={{
@@ -83,10 +107,7 @@ function App() {
         ref={canvasRef}
         width={800}
         height={600}
-        style={{
-          display: "block",
-          margin: "0 auto",
-        }}
+        style={{ display: "block", margin: "0 auto" }}
       />
 
       <HUD
@@ -95,6 +116,8 @@ function App() {
         rpm={rpm}
         lap={lap}
         lapTime={lapTime}
+        position={position}
+        totalCars={totalCars}
       />
     </div>
   );
